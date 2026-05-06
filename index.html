@@ -162,9 +162,9 @@
 
   <div class="submit-row" id="submitRow">
     <button type="button" class="btn-submit" id="submitBtn">
-      שליחה <span aria-hidden="true">←</span>
+      לקביעת פגישה <span aria-hidden="true">←</span>
     </button>
-    <div class="submit-hint"><strong>אחרי השליחה — תוכל לקבוע שיחה ביומן.</strong></div>
+    <div class="submit-hint"><strong>היומן ייפתח אוטומטית עם הזמינות שלי בזמן אמת.</strong></div>
     <div class="global-error" id="globalError"></div>
   </div>
 
@@ -181,7 +181,7 @@
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxbIvqwb53dpgUnudbtL_PMqUpyaMGXR5oLk3lkeC6HX1pG5fuuthZc_ZU5SO6LjIkN/exec';
   const FALLBACK_EMAIL = 'tomer@shaykes.com';
   const STORAGE_KEY = 'fit-call-form-short-v1';
-  const CALENDAR_URL = 'PASTE_CALENDAR_LINK_HERE';
+  const CALENDAR_URL = 'https://calendar.app.google/dNxkFuTWu1quwbSC7';
 
   // === QUESTIONS =======================================================
   const QUESTIONS = [
@@ -341,7 +341,12 @@
 
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> שולח...';
+    btn.innerHTML = '<span class="spinner"></span> רגע...';
+
+    // נפתח את היומן מיד תוך כדי לחיצת המשתמש (לא ייחסם ע"י דפדפן)
+    if (CALENDAR_URL && !CALENDAR_URL.startsWith('PASTE_')) {
+      window.open(CALENDAR_URL, '_blank', 'noopener');
+    }
 
     const payload = { ...answers, source:'fit-call-form-short', userAgent:navigator.userAgent };
 
@@ -379,10 +384,10 @@
     wrap.innerHTML = `
       <div class="success">
         <div class="check-circle">✓</div>
-        <h2>נראה שאתה בנתיב הנכון.</h2>
-        <p>כדי לבדוק התאמה אישית ולראות איך אנחנו יכולים לעזור לך לאתר את הנכס הבא, קבע עכשיו שיחת אסטרטגיה קצרה.</p>
+        <h2>היומן נפתח בכרטיסייה חדשה.</h2>
+        <p>בחר את הזמן שמתאים לך ביותר. אם הכרטיסייה לא נפתחה אוטומטית, לחץ על הכפתור.</p>
         <a class="btn-submit" href="${calHref}" target="_blank" rel="noopener" style="margin-top:18px;text-decoration:none;">
-          לקביעת פגישה <span aria-hidden="true">←</span>
+          פתח את היומן <span aria-hidden="true">←</span>
         </a>
       </div>
     `;
