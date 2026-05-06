@@ -138,7 +138,7 @@
 <div class="topbar" id="topbar">
   <div class="topbar-inner">
     <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-    <div class="progress-label" id="progressLabel">0 / 8</div>
+    <div class="progress-label" id="progressLabel">0 / 3</div>
   </div>
 </div>
 
@@ -147,12 +147,12 @@
   <header class="hero" id="hero">
     <img src="assets/kamir-logo.png" alt="Kamir Group" class="logo" />
     <div class="brand-mark"><span class="dot"></span> Kamir Group</div>
-    <h1 class="title">שאלות לקראת שיחת התאמה</h1>
-    <p class="sub">כמה שאלות קצרות שיעזרו לי להגיע לשיחה מוכן.</p>
+    <h1 class="title">עוד שלוש שאלות קצרות לפני השיחה</h1>
+    <p class="sub">3 שאלות, 30 שניות, וקובעים שיחת אסטרטגיה.</p>
     <div class="meta">
-      <span>⏱ כ-3 דקות</span>
+      <span>⏱ פחות מדקה</span>
       <span class="dot"></span>
-      <span>שמירה אוטומטית</span>
+      <span>3 שאלות בלבד</span>
     </div>
   </header>
 
@@ -164,7 +164,7 @@
     <button type="button" class="btn-submit" id="submitBtn">
       שליחה <span aria-hidden="true">←</span>
     </button>
-    <div class="submit-hint">השאלות הפתוחות אופציונליות, ענה על מה שמתחשק. <strong>נדבר בקרוב.</strong></div>
+    <div class="submit-hint"><strong>אחרי השליחה — תוכל לקבוע שיחה ביומן.</strong></div>
     <div class="global-error" id="globalError"></div>
   </div>
 
@@ -178,63 +178,32 @@
 
 <script>
   // === CONFIG ===========================================================
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxbIvqwb53dpgUnudbtL_PMqUpyaMGXR5oLk3lkeC6HX1pG5fuuthZc_ZU5SO6LjIkN/exec';
+  const SCRIPT_URL = 'PASTE_APPS_SCRIPT_WEB_APP_URL_HERE';
   const FALLBACK_EMAIL = 'tomer@shaykes.com';
-  const STORAGE_KEY = 'fit-call-form-v2';
+  const STORAGE_KEY = 'fit-call-form-short-v1';
+  const CALENDAR_URL = 'PASTE_CALENDAR_LINK_HERE';
 
-  // === QUESTIONS (verified from the live form) =========================
+  // === QUESTIONS =======================================================
   const QUESTIONS = [
-    { id:'name',  type:'text',  required:true,
-      title:'שם מלא',
-      placeholder:'שם פרטי ושם משפחה',
-      autocomplete:'name' },
-
-    { id:'email', type:'email', required:true,
-      title:'כתובת אימייל',
-      help:'יעזור לי לשלוח לך תזכורת לפני השיחה.',
-      placeholder:'name@example.com',
-      autocomplete:'email' },
-
-    { id:'experience', type:'radio', required:true,
-      title:'ניסיון בהשקעות',
-      options:[
-        'מחזיק בנדל״ן בישראל / בחו״ל',
-        'משקיע בשוק ההון',
-        'מטבעות קריפטו',
-        'קופת גמל / קרן השתלמות',
-        'לא משקיע בכלל',
-        'אחר',
-      ]},
-
-    { id:'priority', type:'radio', required:true,
-      title:'מה חשוב לך במיוחד בליווי',
-      options:[
-        'תהליך מסודר וברור',
-        'שקיפות מלאה',
-        'ליווי צמוד וזמינות מלאה לאורך כל הדרך',
-        'חיסכון בזמן',
-      ]},
-
-    { id:'why_now', type:'textarea', required:false,
-      title:'מה גורם לך לרצות להתחיל עכשיו ולא בעוד שנה?',
-      placeholder:'אפשר במשפט או שניים, מה הדחיפות / ההזדמנות שאתה רואה.' },
-
-    { id:'focus', type:'textarea', required:false,
-      title:'על מה תרצה שנשים דגש בשיחה שלנו?',
-      placeholder:'נושאים, סוגיות, או שאלות שחשוב לך לכסות.' },
-
     { id:'budget', type:'radio', required:true,
-      title:'טווח השקעה מוערך להתחלה',
+      title:'מהו טווח ההון הזמין שברצונך להשקיע בנדל״ן בארה״ב?',
       options:[
-        '60,000$ - 80,000$',
-        '80,000$ - 120,000$',
-        '120,000$+',
-        'עוד לא החלטתי / צריך להבין את זה בשיחה',
+        '$50,000 - $70,000',
+        '$70,000 - $100,000',
+        '$100,000+',
       ]},
 
-    { id:'success', type:'textarea', required:false,
-      title:'אם נצא לדרך, מה ייחשב מבחינתך הצלחה בתהליך?',
-      placeholder:'איך תיראה התוצאה שתגרום לך לומר ״הצליח״.' },
+    { id:'timeline', type:'radio', required:true,
+      title:'מה לוח הזמנים המועדף עליך ליציאה לדרך?',
+      options:[
+        'מיידית',
+        'ב-3 החודשים הקרובים',
+        'רק בודק אופציות כרגע',
+      ]},
+
+    { id:'goal', type:'textarea', required:true,
+      title:'מה הדבר שהכי חשוב לך להשיג בהשקעה הקרובה?',
+      placeholder:'משפט אחד מספיק.' },
   ];
 
   // === STATE ============================================================
@@ -413,17 +382,20 @@
   }
 
   function showSuccess(name){
-    const first = (name || '').toString().trim().split(/\s+/)[0];
     document.getElementById('form').classList.add('hidden');
     document.getElementById('submitRow').classList.add('hidden');
     document.getElementById('topbar').classList.add('hidden');
     const wrap = document.getElementById('successWrap');
     wrap.classList.remove('hidden');
+    const calHref = (CALENDAR_URL && !CALENDAR_URL.startsWith('PASTE_')) ? CALENDAR_URL : '#';
     wrap.innerHTML = `
       <div class="success">
         <div class="check-circle">✓</div>
-        <h2>${first ? 'תודה ' + escapeHtml(first) + '!' : 'תודה רבה!'}</h2>
-        <p>קיבלתי את התשובות שלך. אקרא אותן לפני השיחה כדי שנגיע ממוקדים, נדבר בקרוב.</p>
+        <h2>נראה שאתה בנתיב הנכון.</h2>
+        <p>כדי לבדוק התאמה אישית ולראות איך אנחנו יכולים לעזור לך לאתר את הנכס הבא, קבע עכשיו שיחת אסטרטגיה קצרה.</p>
+        <a class="btn-submit" href="${calHref}" target="_blank" rel="noopener" style="margin-top:18px;text-decoration:none;">
+          לקביעת שיחת התאמה ביומן <span aria-hidden="true">←</span>
+        </a>
       </div>
     `;
     window.scrollTo({top:0, behavior:'smooth'});
