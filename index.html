@@ -138,7 +138,7 @@
 <div class="topbar" id="topbar">
   <div class="topbar-inner">
     <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-    <div class="progress-label" id="progressLabel">0 / 3</div>
+    <div class="progress-label" id="progressLabel">0 / 1</div>
   </div>
 </div>
 
@@ -147,12 +147,12 @@
   <header class="hero" id="hero">
     <img src="assets/kamir-logo.png" alt="Kamir Group" class="logo" />
     <div class="brand-mark"><span class="dot"></span> Kamir Group</div>
-    <h1 class="title">עוד שלוש שאלות קצרות לפני השיחה</h1>
-    <p class="sub">3 שאלות, 30 שניות, וקובעים שיחת אסטרטגיה.</p>
+    <h1 class="title">שאלה אחת קצרה לפני השיחה</h1>
+    <p class="sub">10 שניות, וקובעים שיחה.</p>
     <div class="meta">
-      <span>⏱ פחות מדקה</span>
+      <span>⏱ 10 שניות</span>
       <span class="dot"></span>
-      <span>3 שאלות בלבד</span>
+      <span>שאלה אחת</span>
     </div>
   </header>
 
@@ -178,32 +178,20 @@
 
 <script>
   // === CONFIG ===========================================================
-  const SCRIPT_URL = 'PASTE_APPS_SCRIPT_WEB_APP_URL_HERE';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxbIvqwb53dpgUnudbtL_PMqUpyaMGXR5oLk3lkeC6HX1pG5fuuthZc_ZU5SO6LjIkN/exec';
   const FALLBACK_EMAIL = 'tomer@shaykes.com';
   const STORAGE_KEY = 'fit-call-form-short-v1';
   const CALENDAR_URL = 'PASTE_CALENDAR_LINK_HERE';
 
   // === QUESTIONS =======================================================
   const QUESTIONS = [
-    { id:'budget', type:'radio', required:true,
-      title:'מהו טווח ההון הזמין שברצונך להשקיע בנדל״ן בארה״ב?',
-      options:[
-        '$50,000 - $70,000',
-        '$70,000 - $100,000',
-        '$100,000+',
-      ]},
-
     { id:'timeline', type:'radio', required:true,
-      title:'מה לוח הזמנים המועדף עליך ליציאה לדרך?',
+      title:'מתי תהיה מוכן לצאת לדרך?',
       options:[
         'מיידית',
         'ב-3 החודשים הקרובים',
         'רק בודק אופציות כרגע',
       ]},
-
-    { id:'goal', type:'textarea', required:true,
-      title:'מה הדבר שהכי חשוב לך להשיג בהשקעה הקרובה?',
-      placeholder:'משפט אחד מספיק.' },
   ];
 
   // === STATE ============================================================
@@ -355,7 +343,7 @@
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> שולח...';
 
-    const payload = { ...answers, source:'fit-call-form', userAgent:navigator.userAgent };
+    const payload = { ...answers, source:'fit-call-form-short', userAgent:navigator.userAgent };
 
     try{
       if (!SCRIPT_URL || SCRIPT_URL.startsWith('PASTE_')){
@@ -394,7 +382,7 @@
         <h2>נראה שאתה בנתיב הנכון.</h2>
         <p>כדי לבדוק התאמה אישית ולראות איך אנחנו יכולים לעזור לך לאתר את הנכס הבא, קבע עכשיו שיחת אסטרטגיה קצרה.</p>
         <a class="btn-submit" href="${calHref}" target="_blank" rel="noopener" style="margin-top:18px;text-decoration:none;">
-          לקביעת שיחת התאמה ביומן <span aria-hidden="true">←</span>
+          לקביעת פגישה <span aria-hidden="true">←</span>
         </a>
       </div>
     `;
