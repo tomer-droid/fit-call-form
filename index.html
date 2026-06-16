@@ -166,9 +166,9 @@
 
   <div class="submit-row" id="submitRow">
     <button type="button" class="btn-submit" id="submitBtn">
-      לקביעת פגישה <span aria-hidden="true">←</span>
+      סיום ושליחה <span aria-hidden="true">←</span>
     </button>
-    <div class="submit-hint"><strong>היומן ייפתח אוטומטית עם הזמינות שלי בזמן אמת.</strong></div>
+    <div class="submit-hint"><strong>התשובות יישלחו אליי ישירות. תודה שהקדשת זמן למלא.</strong></div>
     <div class="global-error" id="globalError"></div>
   </div>
 
@@ -406,12 +406,7 @@
 
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> רגע...';
-
-    // נפתח את היומן מיד תוך כדי לחיצת המשתמש (לא ייחסם ע"י דפדפן)
-    if (CALENDAR_URL && !CALENDAR_URL.startsWith('PASTE_')) {
-      window.open(CALENDAR_URL, '_blank', 'noopener');
-    }
+    btn.innerHTML = '<span class="spinner"></span> שולח...';
 
     const payload = { ...answers, source:'fit-call-form-long', userAgent:navigator.userAgent };
 
@@ -445,15 +440,10 @@
     document.getElementById('topbar').classList.add('hidden');
     const wrap = document.getElementById('successWrap');
     wrap.classList.remove('hidden');
-    const calHref = (CALENDAR_URL && !CALENDAR_URL.startsWith('PASTE_')) ? CALENDAR_URL : '#';
     wrap.innerHTML = `
       <div class="success">
         <div class="check-circle">✓</div>
-        <h2>היומן נפתח בכרטיסייה חדשה.</h2>
-        <p>בחר את הזמן שמתאים לך ביותר. אם הכרטיסייה לא נפתחה אוטומטית, לחץ על הכפתור.</p>
-        <a class="btn-submit" href="${calHref}" target="_blank" rel="noopener" style="margin-top:18px;text-decoration:none;">
-          פתח את היומן <span aria-hidden="true">←</span>
-        </a>
+        <h2>יום טוב!</h2>
       </div>
     `;
     window.scrollTo({top:0, behavior:'smooth'});
