@@ -93,6 +93,10 @@
   .opt.selected{border-color:var(--ink);background:rgba(43,49,60,.05);box-shadow:0 0 0 2px rgba(43,49,60,.10);}
   .opt.selected .dot{border-color:var(--ink);background:var(--ink);}
   .opt.selected .dot::after{content:'';width:8px;height:8px;border-radius:999px;background:#fff;}
+  /* Checkbox (multi-select) */
+  .opt .box{width:20px;height:20px;border-radius:6px;border:2px solid rgba(43,49,60,.28);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s ease;background:#fff;}
+  .opt.selected .box{border-color:var(--ink);background:var(--ink);}
+  .opt.selected .box::after{content:'✓';color:#fff;font-size:13px;font-weight:900;line-height:1;}
 
   /* Error message inside card */
   .qerror{margin-top:10px;color:var(--danger);font-size:13.5px;font-weight:700;display:none;}
@@ -147,12 +151,12 @@
   <header class="hero" id="hero">
     <img src="assets/kamir-logo.png" alt="Kamir Group" class="logo" />
     <div class="brand-mark"><span class="dot"></span> Kamir Group</div>
-    <h1 class="title">שאלה אחת קצרה לפני השיחה</h1>
-    <p class="sub">10 שניות, וקובעים שיחה.</p>
+    <h1 class="title">כמה שאלות לפני שנדבר</h1>
+    <p class="sub">2 דקות שיעזרו לי להתכונן לשיחה ולוודא שהיא רלוונטית עבורך.</p>
     <div class="meta">
-      <span>⏱ 10 שניות</span>
+      <span>⏱ כ-2 דקות</span>
       <span class="dot"></span>
-      <span>שאלה אחת</span>
+      <span>8 שאלות</span>
     </div>
   </header>
 
@@ -180,18 +184,61 @@
   // === CONFIG ===========================================================
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxbIvqwb53dpgUnudbtL_PMqUpyaMGXR5oLk3lkeC6HX1pG5fuuthZc_ZU5SO6LjIkN/exec';
   const FALLBACK_EMAIL = 'tomer@shaykes.com';
-  const STORAGE_KEY = 'fit-call-form-short-v1';
+  const STORAGE_KEY = 'fit-call-form-long-v1';
   const CALENDAR_URL = 'https://calendar.app.google/dNxkFuTWu1quwbSC7';
 
   // === QUESTIONS =======================================================
   const QUESTIONS = [
-    { id:'timeline', type:'radio', required:true,
-      title:'מתי תהיה מוכן לצאת לדרך?',
+    { id:'name', type:'text', required:true,
+      title:'שם מלא',
+      placeholder:'איך קוראים לך?',
+      autocomplete:'name' },
+
+    { id:'email', type:'email', required:true,
+      title:'כתובת אימייל',
+      placeholder:'name@example.com',
+      autocomplete:'email' },
+
+    { id:'experience', type:'checkbox', required:true,
+      title:'ניסיון בהשקעות <span class="opt-tag">אפשר לסמן כמה תשובות</span>',
       options:[
-        'מיידית',
-        'ב-3 החודשים הקרובים',
-        'רק בודק אופציות כרגע',
+        'לא משקיע בכלל',
+        'משקיע בשוק ההון',
+        'קופת גמל / קרן השתלמות',
+        'מחזיק בנדל״ן בישראל / בחו״ל',
+        'קריפטו',
+        'אחר',
       ]},
+
+    { id:'priority', type:'radio', required:true,
+      title:'מה חשוב לך במיוחד בליווי',
+      options:[
+        'ליווי צמוד וזמינות מלאה לאורך כל הדרך',
+        'חיסכון בזמן',
+        'שקיפות מלאה',
+        'תהליך מסודר וברור',
+      ]},
+
+    { id:'why_now', type:'textarea', required:false,
+      title:'מה גורם לך לרצות להתחיל עכשיו ולא עוד שנה?',
+      placeholder:'כמה מילים על מה שמניע אותך דווקא עכשיו…' },
+
+    { id:'focus', type:'textarea', required:false,
+      title:'על מה תרצה שנשים דגש בשיחה שלנו?',
+      placeholder:'נושאים, שאלות או חששות שחשוב לך שנכסה…' },
+
+    { id:'budget', type:'radio', required:true,
+      title:'טווח השקעה מוערך להתחלה',
+      options:[
+        '60,000$ - 100,000$',
+        '100,000$ - 200,000$',
+        '200,000$ +',
+        'עוד לא החלטתי / צריך להבין את זה בשיחה',
+      ]},
+
+    { id:'success', type:'textarea', required:false,
+      title:'אם נצא לדרך - מה ייחשב מבחינתך הצלחה בתהליך',
+      placeholder:'איך נראית הצלחה עבורך בסוף התהליך…' },
   ];
 
   // === STATE ============================================================
@@ -245,6 +292,18 @@
         }).join('')}
       </div>`;
     }
+    if (q.type === 'checkbox'){
+      const selected = String(value || '').split(', ').filter(Boolean);
+      return `<div class="options" id="opts-${q.id}" role="group" aria-label="${escapeAttr(q.title)}">
+        ${q.options.map(opt => {
+          const sel = selected.includes(opt) ? 'selected' : '';
+          return `<label class="opt opt-check ${sel}" data-q="${q.id}" data-val="${escapeAttr(opt)}" data-multi="1" tabindex="0">
+            <span class="box" aria-hidden="true"></span>
+            <span>${escapeHtml(opt)}</span>
+          </label>`;
+        }).join('')}
+      </div>`;
+    }
     return '';
   }
 
@@ -260,9 +319,15 @@
     const lbl = e.target.closest('.opt');
     if (!lbl) return;
     const qid = lbl.dataset.q;
-    setAnswer(qid, lbl.dataset.val);
     const opts = document.getElementById('opts-' + qid);
-    opts.querySelectorAll('.opt').forEach(o => o.classList.toggle('selected', o === lbl));
+    if (lbl.dataset.multi){
+      lbl.classList.toggle('selected');
+      const vals = [...opts.querySelectorAll('.opt.selected')].map(o => o.dataset.val);
+      setAnswer(qid, vals.join(', '));
+    } else {
+      setAnswer(qid, lbl.dataset.val);
+      opts.querySelectorAll('.opt').forEach(o => o.classList.toggle('selected', o === lbl));
+    }
   });
 
   form.addEventListener('keydown', (e) => {
@@ -348,7 +413,7 @@
       window.open(CALENDAR_URL, '_blank', 'noopener');
     }
 
-    const payload = { ...answers, source:'fit-call-form-short', userAgent:navigator.userAgent };
+    const payload = { ...answers, source:'fit-call-form-long', userAgent:navigator.userAgent };
 
     try{
       if (!SCRIPT_URL || SCRIPT_URL.startsWith('PASTE_')){
